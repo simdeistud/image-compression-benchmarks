@@ -70,7 +70,7 @@ General Requirements:
 - for each image, the script runs the encode benchmark, then it saves the encoded image in a variable from the stdout. the encoded image is then benchmarked with the decode program, and lastly the decoded image is also saved in a variable
 - the script will capture and save the metrics from the encode and decode program, it will also measure the size of the encoded image and also calculate the compression ratio. the script will also calculate and save the PSNR and SSIM between the raw input image and the final decoded image. it will also calculate and save the frames per second and megapixels per second for encoding/decoding.
 - PSNR and SSIM should be calculated using high performance python libraries if possible
-- each row of the csv file will contain the following information: the metrics from the previous point, the filename of the input image, the encoding and decoding commands
+- each row of the csv file will contain the following information: the metrics from the previous point, the filename of the input image, a column for each parameter with its value, the encoding and decoding commands
 - if the script is ran in "opt" mode, the PATH will refer to a single image, and the script will perform each valid combination of the encode/decode parameters for that image. if the encode and decode programs share some parameters, the encode and decode must be done with the same parameters (for example, if the encoder and decoder have a parameter named "algorithm", if you set the encoder to use "-algorithm fast" the decoder will also use "-algorithm fast". no mixing between same parameters!)
 - The provided Python script resolves this by running each executable twice per configuration: once in benchmark mode to capture metrics, once in normal mode with --output - to capture the binary payload.
 - The script computes throughput (fps and mpx/s) using the full average measured iteration time: SETUP_TIME + PROCESS_TIME + RESET_TIME.
@@ -80,6 +80,7 @@ General Requirements:
 - make the structure of all the files (docker, cpp, python, cmake, etc.) as standard as possible because i will ask you to do this with other libraries too
 - if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax. this is true for the programs and the scripts
 - all the produced files should be given as downloads with the correct given filenames, and not displayed for copy-paste
+- all the numbers outputted and saved must be in pure decimal form, no scientific notation
 
 libjpeg-turbo_encode specific requirements:
 - --quality flag to specify quality
