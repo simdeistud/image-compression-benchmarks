@@ -1,8 +1,8 @@
-#include <jpeglib.h>
 #include <csetjmp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cs
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -11,6 +11,7 @@
 #include <string_view>
 #include <vector>
 #include <chrono>
+#include <jpeglib.h>
 
 #ifdef _WIN32
 #include <fcntl.h>

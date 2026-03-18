@@ -1,4 +1,3 @@
-#include <jpeglib.h>
 #include <csetjmp>
 #include <cstdio>
 #include <cstdlib>
@@ -13,6 +12,7 @@
 #include <string_view>
 #include <vector>
 #include <chrono>
+#include <jpeglib.h>
 
 #ifdef _WIN32
 #include <fcntl.h>

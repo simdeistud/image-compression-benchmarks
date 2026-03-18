@@ -19,7 +19,7 @@ RUN case "${CHANNEL}" in \
       *) echo "CHANNEL must be stable or dev" >&2; exit 1 ;; \
     esac
 
-RUN set -eux;                 git clone --recursive --depth 1 --branch main https://github.com/google/jpegli.git /tmp/codec-src;                 if [[ "${CHANNEL}" == "stable" ]]; then                   git -C /tmp/codec-src checkout main;                 else                   git -C /tmp/codec-src checkout main;                 fi;                 cmake -S /tmp/codec-src -B /tmp/codec-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local;                 cmake --build /tmp/codec-build --config Release -j"$(nproc)";                 cmake --install /tmp/codec-build;                 ldconfig;                 rm -rf /tmp/codec-src /tmp/codec-build
+RUN set -eux;                 git clone --recursive --depth 1 --branch main https://github.com/google/jpegli.git /tmp/codec-src;                 if [[ "${CHANNEL}" == "stable" ]]; then                   git -C /tmp/codec-src checkout main;                 else                   git -C /tmp/codec-src checkout main;                 fi;                 cmake -S /tmp/codec-src -B /tmp/codec-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_TESTING=OFF;                 cmake --build /tmp/codec-build --config Release -j"$(nproc)";                 cmake --install /tmp/codec-build;                 ldconfig;                 rm -rf /tmp/codec-src /tmp/codec-build
 
 WORKDIR /workspace/src
 COPY ./src/jpegli_encode.cpp ./src/jpegli_decode.cpp ./src/CMakeLists.txt ./src/jpegli_benchmark.py /workspace/src/
