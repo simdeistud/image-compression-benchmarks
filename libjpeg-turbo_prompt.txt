@@ -1,0 +1,101 @@
+Create a Dockerfile and a docker-compose.yml for the library libjpeg-turbo.
+
+Use these naming rules:
+- image name: libjpeg-turbo-container
+- service name: libjpeg-turbo-container
+- source directory inside container: /workspace/src
+- build directory inside container: /workspace/build
+- results mount path: /workspace/results
+- imageset mount path: /workspace/imageset
+
+Source files to copy from ./src:
+- libjpeg-turbo_encode.cpp
+- libjpeg-turbo_decode.cpp
+- CMakeLists.txt
+- libjpeg-turbo_benchmark.py
+
+Requirements:
+- latest stable Ubuntu base
+- works with docker and podman
+- C/C++ toolchain + CMake installed
+- install latest stable libjpeg-turbo from source into standard path
+- single build arg exactly: CHANNEL=stable|dev
+- stable = latest stable official source
+- dev = latest public development source, if verifiable
+- prefer source control systems for easier download over tarballs or zips, if possible
+- prefer official sources, if possible
+- the libraries must be built using the flags for best performance, if they are supported or documented
+- avoid including in the build unnecessary features such as tests and external libraries that do extra things that the benchmarks do not need
+- if there are problems with finding the stable/dev branch, use the only one you find for both dev and stable options
+- no other selection arguments
+- compile the provided CMake project in Release mode only
+- generate docker-compose.yml with bind mounts for ./results and ./imageset
+- use correct runtime mounts, not Dockerfile-only host bind mounts
+- adapt all names consistently to libjpeg-turbo
+
+Return:
+1. Dockerfile
+2. docker-compose.yml
+3. build/run examples for stable and dev
+4. brief note if dev source is unofficial or not publicly available
+
+Create an encode and decode benchmarking programs for the libjpeg-turbo library in c++20 using cmake.
+
+Use these naming rules:
+- the encoding program must be called libjpeg-turbo_encode.cpp
+- the decoding program must be called libjpeg-turbo_decode.cpp
+- the benchmarking script must be called libjpeg-turbo_benchmark.py
+
+General Requirements:
+- the cpp programs must be written to work for the operating system of the docker image
+- the cpp programs must take the image from stdin
+- the encode program must take as input an interleaved rgb24 image
+- the decode program must output an interleaved rgb24 image
+- if the library can work natively with RGB24 use that
+- if the library cannot directly encode rgb24 data, you must convert it to the compatible format before every encoding, not just once at the start of the program
+- if the library cannot directly decode to rgb24 data, you must convert it from the compatible format after every decoding, not just once at the end of the program
+- they must have the following flags: --width and --height to specify dimensions, "--iterations N" where N is the number of iterations, "--benchmark" if put by the user enables benchmark mode, "--output PATHNAME|-" either saves the output file in the path or prints it to stdout
+- if benchmark is enabled, the -o option is disabled. if the -o option is enabled, the -i and -b flags are disabled
+- the program must encode/decode the input image for the -i number of iterations with 10 warmup iterations
+- if benchmark mode is enabled, the program must measure the following metrics: time to create the encoder/decoder, avg time to set up the encoder/decoder for each image, avg time to encode/decode the image, avg time to reset the encoder/decoder for the next iteration, time to destroy the encoder/decoder at the end of the benchmark
+- the measurements will be in seconds
+- if benchmark mode is enabled, those metrics must be printed to stdout in that order and in the format LABEL:value
+- even if we are benchmarking on the same image, we should treat each iteration as independent, as if every next image is a new one
+- the arguments will be in the order: --width, --height, --iterations, <program specific arguments>, --benchmark. --output
+- the decoder will not have the --width and --height arguments since it should be able to deduce the dimensions from the image
+- the python benchmarking program takes as input a PATH
+- it has the --width and --height flags to specify the dimensions of the images in the directory (they will all have the same dimensions)
+- it also has a --mode flag which can either be "opt" or "survey"
+- it has an --output flag to specify the path of the csv file used to save the results
+- for each image, the script runs the encode benchmark, then it saves the encoded image in a variable from the stdout. the encoded image is then benchmarked with the decode program, and lastly the decoded image is also saved in a variable
+- the script will capture and save the metrics from the encode and decode program, it will also measure the size of the encoded image and also calculate the compression ratio. the script will also calculate and save the PSNR and SSIM between the raw input image and the final decoded image. it will also calculate and save the frames per second and megapixels per second for encoding/decoding.
+- PSNR and SSIM should be calculated using high performance python libraries if possible
+- each row of the csv file will contain the following information: the metrics from the previous point, the filename of the input image, the encoding and decoding commands
+- if the script is ran in "opt" mode, the PATH will refer to a single image, and the script will perform each valid combination of the encode/decode parameters for that image. if the encode and decode programs share some parameters, the encode and decode must be done with the same parameters (for example, if the encoder and decoder have a parameter named "algorithm", if you set the encoder to use "-algorithm fast" the decoder will also use "-algorithm fast". no mixing between same parameters!)
+- The provided Python script resolves this by running each executable twice per configuration: once in benchmark mode to capture metrics, once in normal mode with --output - to capture the binary payload.
+- The script computes throughput (fps and mpx/s) using the full average measured iteration time: SETUP_TIME + PROCESS_TIME + RESET_TIME.
+- if the script is ran in "survey" mode, the PATH will refer to a folder of images, and the script will perform the benchmarks for each image using a fixed set of parameters for all of them. in that case, the script will accept two additional arguments: --encoding_pars and --decoding_pars which will be strings in key:value form. of course the parameters will follow precisely the ones from the cpp programs
+- the number of iterations will always be 10 in all cases
+- make the structure of all the files (docker, cpp, python, cmake, etc.) as standard as possible because i will ask you to do this with other libraries too
+- if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax. this is true for the programs and the scripts
+- all the produced files should be given as downloads with the correct given filenames, and not displayed for copy-paste
+
+libjpeg-turbo_encode specific requirements:
+- --quality flag to specify quality
+- --subsampling flag to specify subsampling between 420, 422, and 444
+- --dct_algorithm flag to specify dct algorithm between fast, float, int
+- --entropy to specify entropy algorithm between huffman, arithmetic
+- --restart_interval to specify the restart interval between. 0 means restart interval is not set
+
+libjpeg-turbo_decode specific requirements:
+- -dct_algorithm flag to specify dct algorithm between fast, float, int
+
+libjpeg-turbo_benchmark specific requirements:
+- the qualities will not be iterated one by one, but from 10 to 90 in increments of 10
+- the restart intervals will not be iterated one by one, but from 0 to 32 in increments of 8
+
+Return:
+1. encode and decode cpp files
+2. cmake file
+3. python benchmarking file
+4. a report if any ambiguities were found
