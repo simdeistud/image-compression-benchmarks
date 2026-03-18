@@ -76,6 +76,7 @@ General Requirements:
 - The script computes throughput (fps and mpx/s) using the full average measured iteration time: SETUP_TIME + PROCESS_TIME + RESET_TIME.
 - if the script is ran in "survey" mode, the PATH will refer to a folder of images, and the script will perform the benchmarks for each image using a fixed set of parameters for all of them. in that case, the script will accept two additional arguments: --encoding_pars and --decoding_pars which will be strings in key:value form. of course the parameters will follow precisely the ones from the cpp programs
 - the number of iterations will always be 10 in all cases
+- the script will output to stdout a sort of progress visualization
 - make the structure of all the files (docker, cpp, python, cmake, etc.) as standard as possible because i will ask you to do this with other libraries too
 - if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax. this is true for the programs and the scripts
 - all the produced files should be given as downloads with the correct given filenames, and not displayed for copy-paste
