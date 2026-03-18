@@ -78,6 +78,8 @@ General Requirements:
 - the number of iterations will always be 10 in all cases
 - the script will output to stdout a sort of progress visualization
 - make the structure of all the files (docker, cpp, python, cmake, etc.) as standard as possible because i will ask you to do this with other libraries too
+- save for the encode/decode parameters that have been specified in the flags, the rest of the program should use the fastest options provided by the library. always prefer processing time over compression quality and size
+- if the library is multithreaded, use only 1 thread if on the CPU. for gpu accelerated ones, no problem
 - if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax. this is true for the programs and the scripts
 - all the produced files should be given as downloads with the correct given filenames, and not displayed for copy-paste
 
