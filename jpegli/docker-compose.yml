@@ -1,0 +1,14 @@
+services:
+  jpegli-container:
+    image: jpegli-container
+    container_name: jpegli-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CHANNEL: ${CHANNEL:-stable}
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./results:/workspace/results
+      - ./imageset:/workspace/imageset

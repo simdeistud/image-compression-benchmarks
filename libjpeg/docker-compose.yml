@@ -1,0 +1,14 @@
+services:
+  libjpeg-container:
+    image: libjpeg-container
+    container_name: libjpeg-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CHANNEL: ${CHANNEL:-stable}
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./results:/workspace/results
+      - ./imageset:/workspace/imageset
