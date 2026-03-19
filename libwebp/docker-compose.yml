@@ -1,0 +1,15 @@
+services:
+  libwebp-container:
+    image: libwebp-container
+    container_name: libwebp-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CHANNEL: stable
+    working_dir: /workspace/build
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./results:/workspace/results
+      - ./imageset:/workspace/imageset
