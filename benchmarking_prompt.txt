@@ -9,16 +9,16 @@ Use these naming rules:
 - imageset mount path: /workspace/imageset
 
 Source files to copy from ./src:
-- <LIBRARY NAME>_encode.cpp
-- <LIBRARY NAME>_decode.cpp
+- <LIBRARY NAME>_encode.c
+- <LIBRARY NAME>_decode.c
 - CMakeLists.txt
 - <LIBRARY NAME>_benchmark.py
 
 Requirements:
-- latest stable Ubuntu base
+- latest LTS Ubuntu base
 - works with docker and podman
 - C/C++ toolchain + CMake installed
-- install latest stable <LIBRARY NAME> from source into standard path
+- install <LIBRARY NAME> from source into standard path
 - single build arg exactly: CHANNEL=stable|dev
 - stable = latest stable official source
 - dev = latest public development source, if verifiable
@@ -39,52 +39,55 @@ Return:
 3. build/run examples for stable and dev
 4. brief note if dev source is unofficial or not publicly available
 
-Create an encode and decode benchmarking programs for the <LIBRARY NAME> library in c++20 using cmake.
+Create an encode and decode benchmarking programs for the <LIBRARY NAME> library in ANSI C99 using cmake.
 
 Use these naming rules:
-- the encoding program must be called <LIBRARY NAME>_encode.cpp
-- the decoding program must be called <LIBRARY NAME>_decode.cpp
+- the encoding program must be called <LIBRARY NAME>_encode.c
+- the decoding program must be called <LIBRARY NAME>_decode.c
 - the benchmarking script must be called <LIBRARY NAME>_benchmark.py
 
-General Requirements:
-- the cpp programs must be written to work for the operating system of the docker image
-- the cpp programs must take the image from stdin
+General C programs Requirements:
+- the programs must be written to work for the operating system of the docker image
+- the programs must be written as clearly and simply as possible
+- the programs must take the image from stdin
 - the encode program must take as input an interleaved rgb24 image
 - the decode program must output an interleaved rgb24 image
 - if the library can work natively with RGB24 use that
-- if the library cannot directly encode rgb24 data, you must convert it to the compatible format before every encoding, not just once at the start of the program
-- if the library cannot directly decode to rgb24 data, you must convert it from the compatible format after every decoding, not just once at the end of the program
-- they must have the following flags: --width and --height to specify dimensions, "--iterations N" where N is the number of iterations, "--benchmark" if put by the user enables benchmark mode, "--output PATHNAME|-" either saves the output file in the path or prints it to stdout
-- if benchmark is enabled, the -o option is disabled. if the -o option is enabled, the -i and -b flags are disabled
-- the program must encode/decode the input image for the -i number of iterations with 10 warmup iterations
-- if benchmark mode is enabled, the program must measure the following metrics: time to create the encoder/decoder, avg time to set up the encoder/decoder for each image, avg time to encode/decode the image, avg time to reset the encoder/decoder for the next iteration, time to destroy the encoder/decoder at the end of the benchmark
+- if the library cannot directly encode rgb24 data, warn me and abort this prompt
+- if the library cannot directly decode to rgb24 data, warn me and abort this prompt
+- the programs must have the following flags: --width and --height to specify dimensions, "--iterations N" where N is the number of iterations, "--benchmark" if put by the user enables benchmark mode, "--output PATHNAME|-" either saves the output file in the path or prints it to stdout
+- if benchmark is enabled, the --output option is disabled. if the --output option is enabled, the --iterations and --benchmark flags are disabled
+- the program must encode/decode the input image for the --iterations number of iterations with 10 warmup iterations
+- if benchmark mode is enabled, the program must measure the following metrics: time to create the encoder/decoder ENCODER/DECODER_CREATION_TIME, avg time to set up the encoder/decoder for each image AVG_ENCODER/DECODER_SETUP_TIME, avg time to encode/decode the image AVG_ENCODE/DECODE_TIME, avg time to reset the encoder/decoder for the next iteration AVG_ENCODER/DECODER_RESET_TIME, time to destroy the encoder/decoder at the end of the benchmark ENCODER/DECODER_DESTROY_TIME
 - the measurements will be in seconds
 - if benchmark mode is enabled, those metrics must be printed to stdout in that order and in the format LABEL:value
 - even if we are benchmarking on the same image, we should treat each iteration as independent, as if every next image is a new one
 - the arguments will be in the order: --width, --height, --iterations, <program specific arguments>, --benchmark. --output
 - the decoder will not have the --width and --height arguments since it should be able to deduce the dimensions from the image
-- the python benchmarking program takes as input a PATH
+- save for the encode/decode parameters that have been specified in the flags, the rest of the program should use the fastest options provided by the library. always prefer faster processing time over compression quality and size
+- if the library is multithreaded, use only 1 thread on the CPU. for gpu accelerated ones, no problem
+- if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax
+
+General python script Requirements:
+- the python benchmarking program takes as --input a PATH
 - it has the --width and --height flags to specify the dimensions of the images in the directory (they will all have the same dimensions)
 - it also has a --mode flag which can either be "opt" or "survey"
 - it has an --output flag to specify the path of the csv file used to save the results
+- the arguments will be in the order i listed them
 - for each image, the script runs the encode benchmark, then it saves the encoded image in a variable from the stdout. the encoded image is then benchmarked with the decode program, and lastly the decoded image is also saved in a variable
 - the script will capture and save the metrics from the encode and decode program, it will also measure the size of the encoded image and also calculate the compression ratio. the script will also calculate and save the PSNR and SSIM between the raw input image and the final decoded image. it will also calculate and save the frames per second and megapixels per second for encoding/decoding.
 - PSNR and SSIM should be calculated using high performance python libraries if possible
 - each row of the csv file will contain the following information: the metrics from the previous point, the filename of the input image, a column for each parameter and its value, the encoding and decoding commands
+- the order of the columns will be: filename, the encode/decode parameters and their values with the same order as the c programs, the metrics in the same order as specified, and the commands
 - if the script is ran in "opt" mode, the PATH will refer to a single image, and the script will perform each valid combination of the encode/decode parameters for that image. if the encode and decode programs share some parameters, the encode and decode must be done with the same parameters (for example, if the encoder and decoder have a parameter named "algorithm", if you set the encoder to use "-algorithm fast" the decoder will also use "-algorithm fast". no mixing between same parameters!)
-- The provided Python script resolves this by running each executable twice per configuration: once in benchmark mode to capture metrics, once in normal mode with --output - to capture the binary payload.
+- The runs each executable twice per configuration: once in benchmark mode to capture metrics, once in normal mode with --output - to capture the binary payload.
 - The script computes throughput (fps and mpx/s) using the full average measured iteration time: SETUP_TIME + PROCESS_TIME + RESET_TIME.
-- if the script is ran in "survey" mode, the PATH will refer to a folder of images, and the script will perform the benchmarks for each image using a fixed set of parameters for all of them. in that case, the script will accept two additional arguments: --encoding_pars and --decoding_pars which will be strings in key:value form. of course the parameters will follow precisely the ones from the cpp programs
-- the number of iterations will always be 10 in all cases
-- the script will output to stdout a sort of progress visualization
-- make the structure of all the files (docker, cpp, python, cmake, etc.) as standard as possible because i will ask you to do this with other libraries too
-- save for the encode/decode parameters that have been specified in the flags, the rest of the program should use the fastest options provided by the library. always prefer processing time over compression quality and size
-- if the library is multithreaded, use only 1 thread if on the CPU. for gpu accelerated ones, no problem
-- if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax. this is true for the programs and the scripts
-- all the produced files should be given as downloads with the correct given filenames, and not displayed for copy-paste
+- if the script is ran in "survey" mode, the PATH will refer to a folder of images, and the script will perform the benchmarks for each image using a fixed set of parameters for all of them. in that case, the script will accept two additional arguments: --encoding_pars and --decoding_pars which will be strings in key:value form. of course the parameters will follow precisely the ones from the c programs
+- the number of iterations will always be 100 in all cases
+- the script will output to stdout a sort of progress visualization made of: current iteration/total iterations - filename
+- if the syntax is wrong or the user uses --help, the programs and scripts must display a nice help message with the syntax
 
 <LIBRARY NAME>_encode specific requirements:
-
 
 <LIBRARY NAME>_decode specific requirements:
 
@@ -92,7 +95,10 @@ General Requirements:
 
 
 Return:
-1. encode and decode cpp files
+1. encode and decode c files
 2. cmake file
 3. python benchmarking file
 4. a report if any ambiguities were found
+
+All the produced files should be given as downloads with the correct given filenames, and not displayed for copy-paste
+
