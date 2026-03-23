@@ -1,26 +1,19 @@
-cmake_minimum_required(VERSION 3.20)
-project(libjpeg_bench LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.12)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(libjpeg_benchmarks)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Find system libjpeg (provides target JPEG::JPEG on modern CMake)
 find_package(JPEG REQUIRED)
 
-add_executable(libjpeg_encode libjpeg_encode.cpp)
-add_executable(libjpeg_decode libjpeg_decode.cpp)
 
+# Encoder
+add_executable(libjpeg_encode libjpeg_encode.c)
 target_link_libraries(libjpeg_encode PRIVATE JPEG::JPEG)
+target_include_directories(libjpeg_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Decoder
+add_executable(libjpeg_decode libjpeg_decode.c)
 target_link_libraries(libjpeg_decode PRIVATE JPEG::JPEG)
-
-if(MSVC)
-  target_compile_options(libjpeg_encode PRIVATE /W4 /EHsc)
-  target_compile_options(libjpeg_decode PRIVATE /W4 /EHsc)
-else()
-  target_compile_options(libjpeg_encode PRIVATE -Wall -Wextra -Wpedantic)
-  target_compile_options(libjpeg_decode PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libjpeg_benchmark.py
-               ${CMAKE_CURRENT_BINARY_DIR}/libjpeg_benchmark.py
-               COPYONLY)
+target_include_directories(libjpeg_decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,26 +1,19 @@
-cmake_minimum_required(VERSION 3.20)
-project(mozjpeg_bench LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.12)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(mozjpeg_benchmarks)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Find system mozjpeg (provides target JPEG::JPEG on modern CMake)
 find_package(JPEG REQUIRED)
 
-add_executable(mozjpeg_encode mozjpeg_encode.cpp)
-add_executable(mozjpeg_decode mozjpeg_decode.cpp)
 
+# Encoder
+add_executable(mozjpeg_encode mozjpeg_encode.c)
 target_link_libraries(mozjpeg_encode PRIVATE JPEG::JPEG)
+target_include_directories(mozjpeg_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Decoders
+add_executable(mozjpeg_decode mozjpeg_decode.c)
 target_link_libraries(mozjpeg_decode PRIVATE JPEG::JPEG)
-
-if(MSVC)
-  target_compile_options(mozjpeg_encode PRIVATE /W4 /EHsc)
-  target_compile_options(mozjpeg_decode PRIVATE /W4 /EHsc)
-else()
-  target_compile_options(mozjpeg_encode PRIVATE -Wall -Wextra -Wpedantic)
-  target_compile_options(mozjpeg_decode PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mozjpeg_benchmark.py
-               ${CMAKE_CURRENT_BINARY_DIR}/mozjpeg_benchmark.py
-               COPYONLY)
+target_include_directories(mozjpeg_decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

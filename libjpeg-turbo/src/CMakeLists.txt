@@ -1,26 +1,19 @@
-cmake_minimum_required(VERSION 3.20)
-project(libjpeg_turbo_bench LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.12)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(libjpeg-turbo_benchmarks)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Find system libjpeg-turbo (provides target JPEG::JPEG on modern CMake)
 find_package(JPEG REQUIRED)
 
-add_executable(libjpeg_turbo_encode libjpeg_turbo_encode.cpp)
-add_executable(libjpeg_turbo_decode libjpeg_turbo_decode.cpp)
 
-target_link_libraries(libjpeg_turbo_encode PRIVATE JPEG::JPEG)
-target_link_libraries(libjpeg_turbo_decode PRIVATE JPEG::JPEG)
+# Encoder
+add_executable(libjpeg-turbo_encode libjpeg-turbo_encode.c)
+target_link_libraries(libjpeg-turbo_encode PRIVATE JPEG::JPEG)
+target_include_directories(libjpeg-turbo_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-if(MSVC)
-  target_compile_options(libjpeg_turbo_encode PRIVATE /W4 /EHsc)
-  target_compile_options(libjpeg_turbo_decode PRIVATE /W4 /EHsc)
-else()
-  target_compile_options(libjpeg_turbo_encode PRIVATE -Wall -Wextra -Wpedantic)
-  target_compile_options(libjpeg_turbo_decode PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libjpeg_turbo_benchmark.py
-               ${CMAKE_CURRENT_BINARY_DIR}/libjpeg_turbo_benchmark.py
-               COPYONLY)
+# Decoders
+add_executable(libjpeg-turbo_decode libjpeg-turbo_decode.c)
+target_link_libraries(libjpeg-turbo_decode PRIVATE JPEG::JPEG)
+target_include_directories(libjpeg-turbo_decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

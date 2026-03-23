@@ -1,26 +1,19 @@
-cmake_minimum_required(VERSION 3.20)
-project(jpegli_bench LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.12)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(jpegli_benchmarks)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Find system jpegli (provides target JPEG::JPEG on modern CMake)
 find_package(JPEG REQUIRED)
 
-add_executable(jpegli_encode jpegli_encode.cpp)
-add_executable(jpegli_decode jpegli_decode.cpp)
 
+# Encoder
+add_executable(jpegli_encode jpegli_encode.c)
 target_link_libraries(jpegli_encode PRIVATE JPEG::JPEG)
+target_include_directories(jpegli_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Decoders
+add_executable(jpegli_decode jpegli_decode.c)
 target_link_libraries(jpegli_decode PRIVATE JPEG::JPEG)
-
-if(MSVC)
-  target_compile_options(jpegli_encode PRIVATE /W4 /EHsc)
-  target_compile_options(jpegli_decode PRIVATE /W4 /EHsc)
-else()
-  target_compile_options(jpegli_encode PRIVATE -Wall -Wextra -Wpedantic)
-  target_compile_options(jpegli_decode PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/jpegli_benchmark.py
-               ${CMAKE_CURRENT_BINARY_DIR}/jpegli_benchmark.py
-               COPYONLY)
+target_include_directories(jpegli_decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
