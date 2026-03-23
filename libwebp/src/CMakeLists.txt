@@ -1,27 +1,21 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.12)
 
-project(libwebp_benchmarks LANGUAGES CXX)
+project(libwebp_benchmarks)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(MATH_LIBRARY m)
+SET(LIBSHARPYUV sharpyuv)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-endif()
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-  message(FATAL_ERROR "This project must be configured with -DCMAKE_BUILD_TYPE=Release")
-endif()
+# Find system libwebp
+find_package(WebP REQUIRED)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Encoder
+add_executable(libwebp_encode libwebp_encode.c)
+target_link_libraries(libwebp_encode PRIVATE ${WebP_LIBRARIES} ${MATH_LIBRARY} ${LIBSHARPYUV})
+target_include_directories(libwebp_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${WebP_INCLUDE_DIRS})
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(WEBP REQUIRED IMPORTED_TARGET libwebp)
-
-add_executable(libwebp_encode libwebp_encode.cpp)
-add_executable(libwebp_decode libwebp_decode.cpp)
-
-target_link_libraries(libwebp_encode PRIVATE PkgConfig::WEBP)
-target_link_libraries(libwebp_decode PRIVATE PkgConfig::WEBP)
-
-target_compile_options(libwebp_encode PRIVATE -O3 -DNDEBUG)
-target_compile_options(libwebp_decode PRIVATE -O3 -DNDEBUG)
+# Decoders
+add_executable(libwebp_decode libwebp_decode.c)
+target_link_libraries(libwebp_decode PRIVATE ${WebP_LIBRARIES} ${MATH_LIBRARY} ${LIBSHARPYUV})
+target_include_directories(libwebp_decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${WebP_INCLUDE_DIRS})
