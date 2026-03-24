@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
         }
+        break;
         case 4:
         { /* --quality */
             if (parse_int(optarg, &quality) != 0)
