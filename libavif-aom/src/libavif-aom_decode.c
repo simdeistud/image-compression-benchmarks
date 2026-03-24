@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
     {
         /* === DECODER BENCHMARK === */
         avifDecoder* decoder = avifDecoderCreate();
+        decoder->maxThreads = 1;
+        decoder->codecChoice = AVIF_CODEC_CHOICE_AOM;
         unsigned char *avif_input = NULL;
         size_t avif_input_size = 0;
         if (!strcmp(avif_input_path, "-"))
@@ -132,6 +134,9 @@ int main(int argc, char *argv[])
             size_t rgbi24_output_size = width * height * 3;
             avifDecoderNextImage(decoder);
             avifRGBImageSetDefaults(&rgbi24_output, decoder->image);
+            rgbi24_output.chromaUpsampling = AVIF_CHROMA_UPSAMPLING_FASTEST;
+            rgbi24_output.chromaDownsampling = AVIF_CHROMA_DOWNSAMPLING_FASTEST;
+            rgbi24_output.maxThreads = 1;
             avifRGBImageAllocatePixels(&rgbi24_output);
             avifImageYUVToRGB(decoder->image, &rgbi24_output);
             clock_t t1 = clock();
@@ -148,6 +153,8 @@ int main(int argc, char *argv[])
 
     /* === DECODER CREATION === */
     avifDecoder* decoder = avifDecoderCreate();
+    decoder->maxThreads = 1;
+    decoder->codecChoice = AVIF_CODEC_CHOICE_AOM;
 
     /* === DECODER SETUP === */
     unsigned char *avif_input = NULL;
@@ -168,6 +175,7 @@ int main(int argc, char *argv[])
             return err;
         }
     }
+    
 
     /* === DECODER TEST === */
     avifRGBImage rgbi24_output;
@@ -187,6 +195,9 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     avifRGBImageSetDefaults(&rgbi24_output, decoder->image);
+    rgbi24_output.chromaUpsampling = AVIF_CHROMA_UPSAMPLING_FASTEST;
+    rgbi24_output.chromaDownsampling = AVIF_CHROMA_DOWNSAMPLING_FASTEST;
+    rgbi24_output.maxThreads = 1;
     result =  avifRGBImageAllocatePixels(&rgbi24_output);
     if (result != AVIF_RESULT_OK) {
         fprintf(stderr, "Allocation of RGB samples failed: %s (%s)\n", avif_input_path, avifResultToString(result));

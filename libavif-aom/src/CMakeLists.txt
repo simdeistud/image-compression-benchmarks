@@ -8,9 +8,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 #find_package(AVIF REQUIRED)
 
 # Encoder
-#add_executable(libavif-aom_encode libavif-aom_encode.c)
-#target_link_libraries(libavif-aom_encode PRIVATE avif)
-#target_include_directories(libavif-aom_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} avif)
+add_executable(libavif-aom_encode libavif-aom_encode.c)
+target_link_libraries(libavif-aom_encode PRIVATE avif)
+target_include_directories(libavif-aom_encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} avif)
 
 # Decoders
 add_executable(libavif-aom_decode libavif-aom_decode.c)
