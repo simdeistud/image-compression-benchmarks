@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(nvjpeg2k_benchmarks C)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CUDA_ROOT "/usr/local/cuda")
+set(CUDA_INCLUDE_DIR "${CUDA_ROOT}/include")
+set(CUDA_LIB_DIR "${CUDA_ROOT}/lib64")
+set(NVJ2K_INCLUDE_DIR "/usr/local/cuda/targets/x86_64-linux/include/")
+set(NVJ2K_LIB_DIR "/usr/local/cuda/targets/x86_64-linux/lib/")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CUDA_INCLUDE_DIR} ${NVJ2K_INCLUDE_DIR})
+link_directories(${CUDA_LIB_DIR} ${NVJ2K_LIB_DIR})
+
+
+# Encoder
+#add_executable(nvjpeg2k_encode nvjpeg2k_encode.c)
+#target_link_libraries(nvjpeg2k_encode PRIVATE nvjpeg2k cudart)
+
+# Decoders
+add_executable(nvjpeg2k_decode nvjpeg2k_decode.c)
+target_link_libraries(nvjpeg2k_decode PRIVATE nvjpeg2k cudart)

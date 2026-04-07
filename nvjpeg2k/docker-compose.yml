@@ -1,0 +1,21 @@
+services:
+  nvjpeg2k-container:
+    image: nvjpeg2k-container
+    container_name: nvjpeg2k-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./results:/workspace/results
+      - ./imageset:/workspace/imageset
+      - ./src:/workspace/src
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all      # or 1 if you want only one GPU
+              capabilities: [gpu]
