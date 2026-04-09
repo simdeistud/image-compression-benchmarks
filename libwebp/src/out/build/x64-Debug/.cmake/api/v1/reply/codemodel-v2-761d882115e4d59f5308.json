@@ -1,0 +1,70 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : [],
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "libwebp_benchmarks",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "libwebp_decode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-libwebp_decode-Debug-878ec7950f9a605cf6cb.json",
+					"name" : "libwebp_decode",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "libwebp_encode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-libwebp_encode-Debug-805344d5d87eb22105f8.json",
+					"name" : "libwebp_encode",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/s248508/source/repos/simdeistud/image-compression-benchmarks/libwebp/src/out/build/x64-Debug",
+		"source" : "C:/Users/s248508/source/repos/simdeistud/image-compression-benchmarks/libwebp/src"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

@@ -1,0 +1,7 @@
+# ninja log v6
+12	113	7974361267967268	CMakeFiles/libwebp_encode.dir/getopt.c.obj	b8a01f8361d8c659
+7	119	7974361267917257	CMakeFiles/libwebp_encode.dir/libwebp_encode.c.obj	465a7a76983a06c0
+17	129	7974361268007291	CMakeFiles/libwebp_decode.dir/libwebp_decode.c.obj	b9b4355b6f20c262
+21	130	7974361268057272	CMakeFiles/libwebp_decode.dir/getopt.c.obj	d40f07ff95230d92
+13	374	7974362756168248	libwebp_decode.exe	1ad31ee8058d4bfc
+6	381	7974362756098249	libwebp_encode.exe	f803d15bcd2b60d3
