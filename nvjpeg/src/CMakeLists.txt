@@ -4,17 +4,17 @@ project(nvjpeg_benchmarks C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(CUDA_ROOT "/usr/local/cuda")
+set(CUDA_ROOT "$ENV{CUDA_PATH}")
 set(CUDA_INCLUDE_DIR "${CUDA_ROOT}/include")
-set(CUDA_LIB_DIR "${CUDA_ROOT}/lib64")
+set(CUDA_LIB_DIR "${CUDA_ROOT}/lib/x64")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CUDA_INCLUDE_DIR})
 link_directories(${CUDA_LIB_DIR})
 
 
 # Encoder
-add_executable(nvjpeg_encode nvjpeg_encode.c)
+add_executable(nvjpeg_encode nvjpeg_encode.c getopt.c)
 target_link_libraries(nvjpeg_encode PRIVATE nvjpeg cudart)
 
 # Decoders
-add_executable(nvjpeg_decode nvjpeg_decode.c)
+add_executable(nvjpeg_decode nvjpeg_decode.c getopt.c)
 target_link_libraries(nvjpeg_decode PRIVATE nvjpeg cudart)

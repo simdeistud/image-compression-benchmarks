@@ -1,0 +1,7 @@
+# ninja log v6
+11	103	7974378444851391	CMakeFiles/nvjpeg_encode.dir/getopt.c.obj	1212c7ebe2031788
+20	115	7974378444939450	CMakeFiles/nvjpeg_decode.dir/getopt.c.obj	7e9b5e3f572cb7fb
+7	140	7974378444806239	CMakeFiles/nvjpeg_encode.dir/nvjpeg_encode.c.obj	7720bdd2bcd5c9ba
+149	493	7974378446224568	nvjpeg_decode.exe	564264b8822a8229
+15	149	7974378444891445	CMakeFiles/nvjpeg_decode.dir/nvjpeg_decode.c.obj	56d83e7b9609a1f5
+141	492	7974378446144627	nvjpeg_encode.exe	ab8388acbda602

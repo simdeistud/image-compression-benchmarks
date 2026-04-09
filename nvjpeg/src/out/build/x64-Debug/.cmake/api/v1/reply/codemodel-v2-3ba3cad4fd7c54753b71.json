@@ -1,0 +1,70 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : [],
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "nvjpeg_benchmarks",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "nvjpeg_decode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nvjpeg_decode-Debug-1a5d4dfa7555baa80d81.json",
+					"name" : "nvjpeg_decode",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nvjpeg_encode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nvjpeg_encode-Debug-eba6ed5c4474c1d520f3.json",
+					"name" : "nvjpeg_encode",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/s248508/source/repos/simdeistud/image-compression-benchmarks/nvjpeg/src/out/build/x64-Debug",
+		"source" : "C:/Users/s248508/source/repos/simdeistud/image-compression-benchmarks/nvjpeg/src"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}
