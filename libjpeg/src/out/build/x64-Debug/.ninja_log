@@ -1,0 +1,7 @@
+# ninja log v6
+12	87	7974345487956550	CMakeFiles/libjpeg_encode.dir/getopt.c.obj	53374eb5f024ee6d
+85	2429	7974345816127229	libjpeg_encode.exe	bb1aa4d72fc1aa3f
+19	97	7974345488026617	CMakeFiles/libjpeg_decode.dir/getopt.c.obj	e26cb2f26dcd543f
+12	78	7974345815394845	CMakeFiles/libjpeg_decode.dir/libjpeg_decode.c.obj	c97100491d44f524
+8	85	7974345815354818	CMakeFiles/libjpeg_encode.dir/libjpeg_encode.c.obj	848891cc95d0036d
+79	1870	7974345816057259	libjpeg_decode.exe	a75111d508adee91

@@ -1,0 +1,87 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "JPEG::JPEG::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-JPEG__JPEG-Debug-3aa986d04e12a80441ff.json",
+					"name" : "JPEG::JPEG",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "libjpeg-turbo_benchmarks",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "libjpeg-turbo_decode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-libjpeg-turbo_decode-Debug-4f7cf3cf9fa5c9883be3.json",
+					"name" : "libjpeg-turbo_decode",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "libjpeg-turbo_encode::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-libjpeg-turbo_encode-Debug-d17c7fc79cc8342192c3.json",
+					"name" : "libjpeg-turbo_encode",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/s248508/source/repos/simdeistud/image-compression-benchmarks/libjpeg-turbo/src/out/build/x64-Debug",
+		"source" : "C:/Users/s248508/source/repos/simdeistud/image-compression-benchmarks/libjpeg-turbo/src"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

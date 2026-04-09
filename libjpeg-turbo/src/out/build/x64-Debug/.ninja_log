@@ -1,0 +1,7 @@
+# ninja log v6
+13	99	7974339217490954	CMakeFiles/libjpeg-turbo_encode.dir/getopt.c.obj	a908471efa803b1a
+9	109	7974339217445877	CMakeFiles/libjpeg-turbo_encode.dir/libjpeg-turbo_encode.c.obj	d7da7f96ea8a4f0c
+21	119	7974339217581038	CMakeFiles/libjpeg-turbo_decode.dir/getopt.c.obj	bf5fd4c57d68c7be
+17	121	7974339217531027	CMakeFiles/libjpeg-turbo_decode.dir/libjpeg-turbo_decode.c.obj	d8a3dfb08b779870
+109	488	7974339218455867	libjpeg-turbo_encode.exe	9ea92328facf69f4
+121	498	7974339218575854	libjpeg-turbo_decode.exe	3f3c872753dfe35d
