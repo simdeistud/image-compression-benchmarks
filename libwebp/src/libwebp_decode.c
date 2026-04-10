@@ -97,27 +97,31 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char *inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(webp_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(webp_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
     if (benchmark)
     {
         /* === DECODER BENCHMARK === */
-        unsigned char *webp_input = NULL;
-        size_t webp_input_size = 0;
-        if (!strcmp(webp_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&webp_input, &webp_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(webp_input_path, &webp_input, &webp_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+        unsigned char *webp_input = inbuf;
+        size_t webp_input_size = inbuf_size;
+        
         clock_t total_processing_time = 0;
         int width = 0, height = 0;
         for(int i = 0; i < iterations; ++i)
@@ -129,32 +133,13 @@ int main(int argc, char *argv[])
             WebPFree(rgbi24_output);
             total_processing_time += t1 - t0;
         }
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (width * height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        img_destroy(webp_input);
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
     }
 
     /* === DECODER SETUP === */
-    unsigned char *webp_input = NULL;
-    size_t webp_input_size = 0;
-    if (!strcmp(webp_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&webp_input, &webp_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(webp_input_path, &webp_input, &webp_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
+    unsigned char *webp_input = inbuf;
+    size_t webp_input_size = inbuf_size;
+
     int width = 0, height = 0;
     if (!WebPGetInfo(webp_input, webp_input_size, &width, &height))
     { 
