@@ -115,19 +115,11 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (benchmark)
-    {
-        /* === DECODER BENCHMARK === */
-        struct jpeg_decompress_struct cinfo;
-        struct jpeg_error_mgr jerr;
-        cinfo.err = jpeg_std_error(&jerr);
-        jpeg_create_decompress(&cinfo);
-        JSAMPLE *jpeg_input = NULL;
-        size_t jpeg_input_size = 0;
-        JSAMPROW row_pointer[1];
-        if (!strcmp(jpeg_input_path, "-"))
+    unsigned char *inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(jpeg_input_path, "-"))
         {
-            int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
+            int err = load_img_from_stdin(&inbuf, &inbuf_size);
             if (err)
             {
                 return err;
@@ -135,12 +127,23 @@ int main(int argc, char *argv[])
         }
         else
         {
-            int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
+            int err = load_img_from_path(jpeg_input_path, &inbuf, &inbuf_size);
             if (err)
             {
                 return err;
             }
         }
+
+    if (benchmark)
+    {
+        /* === DECODER BENCHMARK === */
+        struct jpeg_decompress_struct cinfo;
+        struct jpeg_error_mgr jerr;
+        cinfo.err = jpeg_std_error(&jerr);
+        jpeg_create_decompress(&cinfo);
+        JSAMPLE *jpeg_input = inbuf;
+        size_t jpeg_input_size = inbuf_size;
+        JSAMPROW row_pointer[1];
         clock_t total_processing_time = 0;
         int width = 0, height = 0;
         for (int i = 0; i < iterations; i++)
@@ -164,12 +167,8 @@ int main(int argc, char *argv[])
             img_destroy(rgbi24_output);
             total_processing_time += t1 - t0;
         }
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (cinfo.output_width * cinfo.output_height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
         jpeg_destroy_decompress(&cinfo);
-        img_destroy(jpeg_input);
     }
 
     /* === DECODER CREATION === */
@@ -179,25 +178,9 @@ int main(int argc, char *argv[])
     jpeg_create_decompress(&cinfo);
 
     /* === DECODER SETUP === */
-    JSAMPLE *jpeg_input = NULL;
-    size_t jpeg_input_size = 0;
+    JSAMPLE *jpeg_input = inbuf;
+    size_t jpeg_input_size = inbuf_size;
     JSAMPROW row_pointer[1];
-    if (!strcmp(jpeg_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
     jpeg_mem_src(&cinfo, jpeg_input, jpeg_input_size);
     if (jpeg_read_header(&cinfo, TRUE) != JPEG_HEADER_OK)
     { /* Reading the JPEG header is mandatory before starting the decompression */
