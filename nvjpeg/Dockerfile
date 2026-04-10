@@ -7,8 +7,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     pkg-config \
     ca-certificates \
-    git
+    git \
+    python3-numpy python3-skimage python3-scipy python3-pip
 
 RUN mkdir -p /workspace/results /workspace/imageset /workspace/src
+WORKDIR /workspace
+
+COPY /src /workspace/src
+
+RUN cmake -DCMAKE_BUILD_TYPE=Release -S /workspace/src -B /workspace/build; \
+    cmake --build /workspace/build --config Release --parallel
+
+COPY nvjpeg_benchmark.py /workspace/benchmark.py
+
 WORKDIR /workspace
 CMD ["/bin/bash"]

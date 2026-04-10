@@ -182,6 +182,25 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char* inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(rgbi24_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(rgbi24_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
     if (benchmark) {
         /* === ENCODER BENCHMARK === */
         cudaStream_t stream = 0;
@@ -197,24 +216,8 @@ int main(int argc, char* argv[])
         CHECK_NVJPEG(nvjpegEncoderParamsSetOptimizedHuffman(encoder_params, 0, stream));
         CHECK_NVJPEG(nvjpegEncoderParamsSetSamplingFactors(encoder_params, subsampling_to_nvjpegsamp(subsampling), stream));
 
-        unsigned char* rgbi24_input = NULL;
-        size_t rgbi24_input_size = 0;
-        if (!strcmp(rgbi24_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+        unsigned char* rgbi24_input = inbuf;
+        size_t rgbi24_input_size = inbuf_size;
 
         unsigned char* rgbi24_input_device = NULL;
         CHECK_CUDA(cudaMalloc((void**)&rgbi24_input_device, rgbi24_input_size));
@@ -240,7 +243,6 @@ int main(int argc, char* argv[])
         printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
         printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
         printf("Average megapixels per second:%f\n", (width * height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        img_destroy(rgbi24_input);
         CHECK_CUDA(cudaFree(rgbi24_input_device));
         CHECK_NVJPEG(nvjpegEncoderParamsDestroy(encoder_params));
         CHECK_NVJPEG(nvjpegEncoderStateDestroy(encoder_state));
@@ -261,24 +263,9 @@ int main(int argc, char* argv[])
     CHECK_NVJPEG(nvjpegEncoderParamsSetOptimizedHuffman(encoder_params, 0, stream));
     CHECK_NVJPEG(nvjpegEncoderParamsSetSamplingFactors(encoder_params, subsampling_to_nvjpegsamp(subsampling), stream));
 
-    unsigned char* rgbi24_input = NULL;
-    size_t rgbi24_input_size = 0;
-    if (!strcmp(rgbi24_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
+    unsigned char* rgbi24_input = inbuf;
+    size_t rgbi24_input_size = inbuf_size;
+    
     unsigned char* rgbi24_input_device = NULL;
     CHECK_CUDA(cudaMalloc((void**)&rgbi24_input_device, rgbi24_input_size));
     nvjpegImage_t src;

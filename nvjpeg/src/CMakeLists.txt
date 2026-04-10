@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(nvjpeg_benchmarks C)
+project(nvjpeg_benchmarks C CUDA)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 

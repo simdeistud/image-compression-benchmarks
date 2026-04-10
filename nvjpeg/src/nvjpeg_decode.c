@@ -141,6 +141,25 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char *inbuf = NULL;
+        size_t inbuf_size = 0;
+        if (!strcmp(jpeg_input_path, "-"))
+        {
+            int err = load_img_from_stdin(&inbuf, &inbuf_size);
+            if (err)
+            {
+                return err;
+            }
+        }
+        else
+        {
+            int err = load_img_from_path(jpeg_input_path, &inbuf, &inbuf_size);
+            if (err)
+            {
+                return err;
+            }
+        }
+
     if (benchmark)
     {
         /* === DECODER BENCHMARK === */
@@ -150,24 +169,8 @@ int main(int argc, char *argv[])
         nvjpegDevAllocator_t dev_alloc = { dev_malloc, dev_free };
         nvjpegPinnedAllocator_t pinned_alloc = { host_malloc, host_free };
 
-        unsigned char *jpeg_input = NULL;
-        size_t jpeg_input_size = 0;
-        if (!strcmp(jpeg_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+        unsigned char *jpeg_input = inbuf;
+        size_t jpeg_input_size = inbuf_size;
 
         CHECK_NVJPEG(nvjpegCreateEx(
             NVJPEG_BACKEND_GPU_HYBRID_DEVICE,   // or NVJPEG_BACKEND_HARDWARE if supported
@@ -213,7 +216,6 @@ int main(int argc, char *argv[])
         printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
         printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
         printf("Average megapixels per second:%f\n", (width * height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        img_destroy(jpeg_input);
     }
 
     /* === DECODER SETUP === */
@@ -223,24 +225,8 @@ int main(int argc, char *argv[])
     nvjpegDevAllocator_t dev_alloc = { dev_malloc, dev_free };
     nvjpegPinnedAllocator_t pinned_alloc = { host_malloc, host_free };
 
-    unsigned char *jpeg_input = NULL;
-    size_t jpeg_input_size = 0;
-    if (!strcmp(jpeg_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
+    unsigned char *jpeg_input = inbuf;
+    size_t jpeg_input_size = inbuf_size;
 
     CHECK_NVJPEG(nvjpegCreateEx(
         NVJPEG_BACKEND_GPU_HYBRID_DEVICE,   // or NVJPEG_BACKEND_HARDWARE if supported
