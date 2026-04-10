@@ -178,6 +178,7 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
         }
+        break;
         case 8:
         { /* --iterations */
             if (parse_int(optarg, &iterations) != 0)
@@ -215,18 +216,11 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (benchmark){
-        /* === ENCODER BENCHMARK === */
-        struct jpeg_compress_struct cinfo;
-        struct jpeg_error_mgr jerr;
-        cinfo.err = jpeg_std_error(&jerr);
-        jpeg_create_compress(&cinfo);
-        JSAMPLE *rgbi24_input = NULL;
-        size_t rgbi24_input_size = 0;
-        JSAMPROW row_pointer[1];
-        if (!strcmp(rgbi24_input_path, "-"))
+    unsigned char *inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(rgbi24_input_path, "-"))
         {
-            int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
+            int err = load_img_from_stdin(&inbuf, &inbuf_size);
             if (err)
             {
                 return err;
@@ -234,12 +228,23 @@ int main(int argc, char *argv[])
         }
         else
         {
-            int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
+            int err = load_img_from_path(rgbi24_input_path, &inbuf, &inbuf_size);
             if (err)
             {
                 return err;
             }
         }
+
+    if (benchmark){
+        /* === ENCODER BENCHMARK === */
+        struct jpeg_compress_struct cinfo;
+        struct jpeg_error_mgr jerr;
+        cinfo.err = jpeg_std_error(&jerr);
+        jpeg_create_compress(&cinfo);
+        JSAMPLE *rgbi24_input = inbuf;
+        size_t rgbi24_input_size = inbuf_size;
+        JSAMPROW row_pointer[1];
+        
         clock_t total_processing_time = 0;
         for (int i = 0; i < iterations; i++){
             clock_t t0 = clock();
@@ -270,11 +275,7 @@ int main(int argc, char *argv[])
             total_processing_time += t1 - t0;
         }
         jpeg_destroy_compress(&cinfo);
-        img_destroy(rgbi24_input);
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average processing time per iteration (fps):%f\n", iterations / ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (mpix/s):%f\n", (width * height * iterations) / ((double)total_processing_time) / CLOCKS_PER_SEC / 1000000);
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
     }
 
     /* === ENCODER CREATION === */
@@ -284,25 +285,9 @@ int main(int argc, char *argv[])
     jpeg_create_compress(&cinfo);
 
     /* === ENCODER SETUP === */
-    JSAMPLE *rgbi24_input = NULL;
-    size_t rgbi24_input_size = 0;
+    JSAMPLE *rgbi24_input = inbuf;
+    size_t rgbi24_input_size = inbuf_size;
     JSAMPROW row_pointer[1];
-    if (!strcmp(rgbi24_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
