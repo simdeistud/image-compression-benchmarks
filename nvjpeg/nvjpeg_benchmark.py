@@ -11,7 +11,7 @@ ENCODE_PROG_PATH = "build/nvjpeg_encode"
 DECODE_PROG_PATH = "build/nvjpeg_decode"
 
 SUBSAMPLINGS = ["444", "422", "420"]
-QUALITIES = range(0, 101, 10)
+QUALITIES = range(10, 101, 10) # nvjpeg doesn't support quality=0
 
 def run_cmd(cmd, stdin_bytes: bytes):
     """

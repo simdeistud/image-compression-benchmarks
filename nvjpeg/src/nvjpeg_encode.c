@@ -239,10 +239,7 @@ int main(int argc, char* argv[])
             total_processing_time += t1 - t0;
         }
         free(jpeg_output);
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (width * height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
         CHECK_CUDA(cudaFree(rgbi24_input_device));
         CHECK_NVJPEG(nvjpegEncoderParamsDestroy(encoder_params));
         CHECK_NVJPEG(nvjpegEncoderStateDestroy(encoder_state));
