@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <time.h>
-#include <unistd.h>
 #define IMG_IO_IMPLEMENTATION
 #include "img_io.h"
 #include <libgpujpeg/gpujpeg.h>
@@ -98,6 +97,25 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char *inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(jpeg_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(jpeg_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
     if (benchmark)
     {
         /* === DECODER BENCHMARK === */
@@ -106,24 +124,8 @@ int main(int argc, char *argv[])
         struct gpujpeg_image_parameters param_image;
         struct gpujpeg_decoder* decoder;
 
-        unsigned char *jpeg_input = NULL;
-        size_t jpeg_input_size = 0;
-        if (!strcmp(jpeg_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+        unsigned char *jpeg_input = inbuf;
+        size_t jpeg_input_size = inbuf_size;
 
         if (gpujpeg_init_device(0, 0))
         {
@@ -150,12 +152,8 @@ int main(int argc, char *argv[])
             gpujpeg_decoder_decode(decoder, jpeg_input, jpeg_input_size, &decoder_output);
             clock_t t1 = clock();
             total_processing_time += t1 - t0;
-            //usleep(17 * 1000);
         }
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (decoder_output.data_size / 3) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
         gpujpeg_decoder_destroy(decoder);
     }
 
@@ -165,24 +163,8 @@ int main(int argc, char *argv[])
     struct gpujpeg_image_parameters param_image;
     struct gpujpeg_decoder* decoder;
 
-    unsigned char *jpeg_input = NULL;
-    size_t jpeg_input_size = 0;
-    if (!strcmp(jpeg_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
+    unsigned char *jpeg_input = inbuf;
+    size_t jpeg_input_size = inbuf_size;
 
     if (gpujpeg_init_device(0, 0))
     {

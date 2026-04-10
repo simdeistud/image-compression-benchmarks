@@ -190,6 +190,25 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char *inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(rgbi24_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(rgbi24_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
     if (benchmark){
         /* === ENCODER BENCHMARK === */
         struct gpujpeg_parameters param;
@@ -216,24 +235,8 @@ int main(int argc, char *argv[])
         param.restart_interval = restart_interval;
         gpujpeg_parameters_chroma_subsampling(&param, subsampling_to_gpujpegsamp(subsampling));
 
-        unsigned char *rgbi24_input = NULL;
-        size_t rgbi24_input_size = 0;
-        if (!strcmp(rgbi24_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+        unsigned char *rgbi24_input = inbuf;
+        size_t rgbi24_input_size = inbuf_size;
 
         clock_t total_processing_time = 0;
         for(int i = 0; i < iterations; i++){
@@ -246,11 +249,7 @@ int main(int argc, char *argv[])
             total_processing_time += t1 - t0;
             //usleep(17 * 1000);
         }
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (width * height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        img_destroy(rgbi24_input);
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
         gpujpeg_encoder_destroy(encoder);
     }
 
@@ -279,25 +278,8 @@ int main(int argc, char *argv[])
     param.restart_interval = restart_interval;
     gpujpeg_parameters_chroma_subsampling(&param, subsampling_to_gpujpegsamp(subsampling));
 
-    unsigned char *rgbi24_input = NULL;
-    size_t rgbi24_input_size = 0;
-    if (!strcmp(rgbi24_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    
+    unsigned char *rgbi24_input = inbuf;
+    size_t rgbi24_input_size = inbuf_size;
 
     /* === ENCODER TEST === */
     gpujpeg_encoder_input_set_image(&encoder_input, rgbi24_input);

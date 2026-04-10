@@ -31,7 +31,6 @@ services:
     volumes:
       - ./results:/workspace/results
       - ./imageset:/workspace/imageset
-      - ./src:/workspace/src
 
     deploy:
       resources:
