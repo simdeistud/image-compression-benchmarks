@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <time.h>
-#include <unistd.h>
 #define IMG_IO_IMPLEMENTATION
 #include "img_io.h"
 #include <libgpujpeg/gpujpeg.h>
@@ -247,7 +246,6 @@ int main(int argc, char *argv[])
             gpujpeg_encoder_encode(encoder, &param, &param_image, &encoder_input, &jpeg_output, &jpeg_output_size);
             clock_t t1 = clock();
             total_processing_time += t1 - t0;
-            //usleep(17 * 1000);
         }
         fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
         gpujpeg_encoder_destroy(encoder);
