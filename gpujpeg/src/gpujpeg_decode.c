@@ -5,28 +5,27 @@
 #include <errno.h>
 #include <limits.h>
 #include <time.h>
-#include <unistd.h>
 #define IMG_IO_IMPLEMENTATION
 #include "img_io.h"
 #include <libgpujpeg/gpujpeg.h>
 
-static void usage(const char *prog)
+static void usage(const char* prog)
 {
     fprintf(stderr,
-            "Usage: %s [OPTIONS]\n"
-            "\n"
-            "Basic options:\n"
-            "  --iterations <int>         Selected iterations [>0 if --benchmark]\n"
-            "  --benchmark                Benchmark mode (flag)\n"
-            "  --input <path>|-           Selected jpeg [PATH|stdin]\n"
-            "  --output <path>|-          Selected RGBI24 [PATH|stdout]\n"
-            "  --help                     Show this help and exit\n",
-            prog);
+        "Usage: %s [OPTIONS]\n"
+        "\n"
+        "Basic options:\n"
+        "  --iterations <int>         Selected iterations [>0 if --benchmark]\n"
+        "  --benchmark                Benchmark mode (flag)\n"
+        "  --input <path>|-           Selected jpeg [PATH|stdin]\n"
+        "  --output <path>|-          Selected RGBI24 [PATH|stdout]\n"
+        "  --help                     Show this help and exit\n",
+        prog);
 }
 
-static int parse_int(const char *s, int *out)
+static int parse_int(const char* s, int* out)
 {
-    char *end = NULL;
+    char* end = NULL;
     errno = 0;
     long v = strtol(s, &end, 10);
     if (errno != 0 || end == s || *end != '\0' || v < INT_MIN || v > INT_MAX)
@@ -37,12 +36,12 @@ static int parse_int(const char *s, int *out)
     return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int iterations = 0;
     int benchmark = 0;
-    char *jpeg_input_path = NULL;
-    char *rgbi24_output_path = NULL;
+    char* jpeg_input_path = NULL;
+    char* rgbi24_output_path = NULL;
 
     /* === ARGUMENT PARSING === */
 
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
         {"input", required_argument, NULL, 3},
         {"output", required_argument, NULL, 4},
         {"help", no_argument, NULL, 5},
-        {0, 0, 0, 0}};
+        {0, 0, 0, 0} };
 
     int opt, longidx;
     /* Reset getopt state if needed (when embedding): optind = 1; */
@@ -98,6 +97,25 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char* inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(jpeg_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(jpeg_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
     if (benchmark)
     {
         /* === DECODER BENCHMARK === */
@@ -106,24 +124,8 @@ int main(int argc, char *argv[])
         struct gpujpeg_image_parameters param_image;
         struct gpujpeg_decoder* decoder;
 
-        unsigned char *jpeg_input = NULL;
-        size_t jpeg_input_size = 0;
-        if (!strcmp(jpeg_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+        unsigned char* jpeg_input = inbuf;
+        size_t jpeg_input_size = inbuf_size;
 
         if (gpujpeg_init_device(0, 0))
         {
@@ -144,18 +146,14 @@ int main(int argc, char *argv[])
         gpujpeg_decoder_set_output_format(decoder, GPUJPEG_RGB, GPUJPEG_444_U8_P012);
         clock_t total_processing_time = 0;
         int width = 0, height = 0;
-        for(int i = 0; i < iterations; ++i)
+        for (int i = 0; i < iterations; ++i)
         {
             clock_t t0 = clock();
             gpujpeg_decoder_decode(decoder, jpeg_input, jpeg_input_size, &decoder_output);
             clock_t t1 = clock();
             total_processing_time += t1 - t0;
-            //usleep(17 * 1000);
         }
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (decoder_output.data_size / 3) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
         gpujpeg_decoder_destroy(decoder);
     }
 
@@ -165,24 +163,8 @@ int main(int argc, char *argv[])
     struct gpujpeg_image_parameters param_image;
     struct gpujpeg_decoder* decoder;
 
-    unsigned char *jpeg_input = NULL;
-    size_t jpeg_input_size = 0;
-    if (!strcmp(jpeg_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(jpeg_input_path, &jpeg_input, &jpeg_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
+    unsigned char* jpeg_input = inbuf;
+    size_t jpeg_input_size = inbuf_size;
 
     if (gpujpeg_init_device(0, 0))
     {
@@ -201,7 +183,7 @@ int main(int argc, char *argv[])
     gpujpeg_decoder_init(decoder, &param, &param_image);
     gpujpeg_decoder_output_set_default(&decoder_output);
     gpujpeg_decoder_set_output_format(decoder, GPUJPEG_RGB, GPUJPEG_444_U8_P012);
-    
+
 
     /* === DECODER TEST === */
     if (gpujpeg_decoder_decode(decoder, jpeg_input, jpeg_input_size, &decoder_output))
@@ -210,7 +192,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     size_t rgbi24_output_size = decoder_output.data_size;
-    unsigned char *rgbi24_output = malloc(rgbi24_output_size);
+    unsigned char* rgbi24_output = malloc(rgbi24_output_size);
     memcpy(rgbi24_output, decoder_output.data, rgbi24_output_size);
 
     /* === DECODER CLEANUP === */

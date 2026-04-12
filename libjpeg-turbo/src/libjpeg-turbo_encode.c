@@ -9,30 +9,30 @@
 #include "img_io.h"
 #include <jpeglib.h>
 
-static void usage(const char *prog)
+static void usage(const char* prog)
 {
     fprintf(stderr,
-            "Usage: %s [OPTIONS]\n"
-            "\n"
-            "Basic options:\n"
-            "  --width <int>              Input image width (px)\n"
-            "  --height <int>             Input image height (px)\n"
-            "  --subsampling <int>        Selected subsampling [444|422|420]\n"
-            "  --quality <int>            Selected quality [0...100]\n"
-            "  --dct_algorithm <str>      Selected DCT algorithm [int|fast|float]\n"
-            "  --entropy_algorithm <str>  Selected entropy algorithm [huffman|arithmetic]\n"
-            "  --restart_interval <int>   Selected restart interval [>=0]\n"
-            "  --iterations <int>         Selected iterations [>0 if --benchmark]\n"
-            "  --benchmark                Benchmark mode (flag)\n"
-            "  --input <path>|-           Selected JPEG input [PATH|stdin]\n"
-            "  --output <path>|-          Selected RGBI24 output [PATH|stdout]\n"
-            "  --help                     Show this help and exit\n",
-            prog);
+        "Usage: %s [OPTIONS]\n"
+        "\n"
+        "Basic options:\n"
+        "  --width <int>              Input image width (px)\n"
+        "  --height <int>             Input image height (px)\n"
+        "  --subsampling <int>        Selected subsampling [444|422|420]\n"
+        "  --quality <int>            Selected quality [0...100]\n"
+        "  --dct_algorithm <str>      Selected DCT algorithm [int|fast|float]\n"
+        "  --entropy_algorithm <str>  Selected entropy algorithm [huffman|arithmetic]\n"
+        "  --restart_interval <int>   Selected restart interval [>=0]\n"
+        "  --iterations <int>         Selected iterations [>0 if --benchmark]\n"
+        "  --benchmark                Benchmark mode (flag)\n"
+        "  --input <path>|-           Selected JPEG input [PATH|stdin]\n"
+        "  --output <path>|-          Selected RGBI24 output [PATH|stdout]\n"
+        "  --help                     Show this help and exit\n",
+        prog);
 }
 
-static int parse_int(const char *s, int *out)
+static int parse_int(const char* s, int* out)
 {
-    char *end = NULL;
+    char* end = NULL;
     errno = 0;
     long v = strtol(s, &end, 10);
     if (errno != 0 || end == s || *end != '\0' || v < INT_MIN || v > INT_MAX)
@@ -65,7 +65,7 @@ int subsampling_to_hsamp(const int subsampling)
     }
 }
 
-J_DCT_METHOD get_dct(const char *dct_str)
+J_DCT_METHOD get_dct(const char* dct_str)
 {
     if (strcmp(dct_str, "int") == 0)
         return JDCT_ISLOW;
@@ -76,7 +76,7 @@ J_DCT_METHOD get_dct(const char *dct_str)
     return -1;
 }
 
-int get_entropy(const char *entropy_str)
+int get_entropy(const char* entropy_str)
 {
     if (strcmp(entropy_str, "huffman") == 0)
         return 0;
@@ -85,19 +85,19 @@ int get_entropy(const char *entropy_str)
     return -1;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int width = 0;
     int height = 0;
     int subsampling = 0;
     int quality = 0;
-    char *dct_algorithm = NULL;
-    char *entropy_algorithm = NULL;
+    char* dct_algorithm = NULL;
+    char* entropy_algorithm = NULL;
     int restart_interval = 0;
     int iterations = 0;
     int benchmark = 0;
-    char *rgbi24_input_path = NULL;
-    char *jpeg_output_path = NULL;
+    char* rgbi24_input_path = NULL;
+    char* jpeg_output_path = NULL;
 
     /* === ARGUMENT PARSING === */
 
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         {"input", required_argument, NULL, 10},
         {"output", required_argument, NULL, 11},
         {"help", no_argument, NULL, 12},
-        {0, 0, 0, 0}};
+        {0, 0, 0, 0} };
 
     int opt, longidx;
     /* Reset getopt state if needed (when embedding): optind = 1; */
@@ -178,6 +178,7 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
         }
+        break;
         case 8:
         { /* --iterations */
             if (parse_int(optarg, &iterations) != 0)
@@ -215,33 +216,37 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (benchmark){
+    unsigned char* inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(rgbi24_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(rgbi24_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
+    if (benchmark) {
         /* === ENCODER BENCHMARK === */
         struct jpeg_compress_struct cinfo;
         struct jpeg_error_mgr jerr;
         cinfo.err = jpeg_std_error(&jerr);
         jpeg_create_compress(&cinfo);
-        JSAMPLE *rgbi24_input = NULL;
-        size_t rgbi24_input_size = 0;
+        JSAMPLE* rgbi24_input = inbuf;
+        size_t rgbi24_input_size = inbuf_size;
         JSAMPROW row_pointer[1];
-        if (!strcmp(rgbi24_input_path, "-"))
-        {
-            int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
-        else
-        {
-            int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-            if (err)
-            {
-                return err;
-            }
-        }
+
         clock_t total_processing_time = 0;
-        for (int i = 0; i < iterations; i++){
+        for (int i = 0; i < iterations; i++) {
             clock_t t0 = clock();
             cinfo.image_width = width;
             cinfo.image_height = height;
@@ -256,7 +261,7 @@ int main(int argc, char *argv[])
             cinfo.dct_method = get_dct(dct_algorithm);
             cinfo.restart_interval = restart_interval;
             size_t jpeg_output_size = 0;
-            JSAMPLE *jpeg_output = NULL;
+            JSAMPLE* jpeg_output = NULL;
             jpeg_mem_dest(&cinfo, &jpeg_output, &jpeg_output_size);
             jpeg_start_compress(&cinfo, TRUE);
             while (cinfo.next_scanline < cinfo.image_height)
@@ -270,11 +275,7 @@ int main(int argc, char *argv[])
             total_processing_time += t1 - t0;
         }
         jpeg_destroy_compress(&cinfo);
-        img_destroy(rgbi24_input);
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average processing time per iteration (fps):%f\n", iterations / ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (mpix/s):%f\n", (width * height * iterations) / ((double)total_processing_time) / CLOCKS_PER_SEC / 1000000);
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
     }
 
     /* === ENCODER CREATION === */
@@ -284,25 +285,9 @@ int main(int argc, char *argv[])
     jpeg_create_compress(&cinfo);
 
     /* === ENCODER SETUP === */
-    JSAMPLE *rgbi24_input = NULL;
-    size_t rgbi24_input_size = 0;
+    JSAMPLE* rgbi24_input = inbuf;
+    size_t rgbi24_input_size = inbuf_size;
     JSAMPROW row_pointer[1];
-    if (!strcmp(rgbi24_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(rgbi24_input_path, &rgbi24_input, &rgbi24_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
@@ -316,7 +301,7 @@ int main(int argc, char *argv[])
     cinfo.dct_method = get_dct(dct_algorithm);
     cinfo.restart_interval = restart_interval;
     size_t jpeg_output_size = 0;
-    JSAMPLE *jpeg_output = NULL;
+    JSAMPLE* jpeg_output = NULL;
     jpeg_mem_dest(&cinfo, &jpeg_output, &jpeg_output_size);
     jpeg_start_compress(&cinfo, TRUE);
 
@@ -326,7 +311,7 @@ int main(int argc, char *argv[])
         row_pointer[0] = &rgbi24_input[cinfo.next_scanline * cinfo.image_width * cinfo.input_components];
         jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
-    
+
 
     /* === ENCODER RESET === */
     jpeg_finish_compress(&cinfo);
