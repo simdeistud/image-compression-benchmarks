@@ -13,7 +13,7 @@ set(JPEG_DLL "C:/Users/s248508/Documents/benchmark-libraries/libjpeg-turbo64/bin
 function(copy_jpeg_dll target)
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${JPEG_DLL}"
+            "${JPEG_DLL}/jpeg62.dll"
             $<TARGET_FILE_DIR:${target}>
     )
 endfunction()

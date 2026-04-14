@@ -12,7 +12,7 @@ set(GPUJPEG_DLL "C:/Users/s248508/Documents/benchmark-libraries/gpujpeg/bin")
 function(copy_jpeg_dll target)
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${GPUJPEG_DLL}"
+            "${GPUJPEG_DLL}/gpujpeg.dll"
             $<TARGET_FILE_DIR:${target}>
     )
 endfunction()
