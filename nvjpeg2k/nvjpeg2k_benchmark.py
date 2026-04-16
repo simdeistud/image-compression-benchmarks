@@ -7,8 +7,8 @@ import numpy as np
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 
 # Paths (relative to where you run the script)
-ENCODE_PROG_PATH = "build/nvjpeg2k_encode"
-DECODE_PROG_PATH = "build/nvjpeg2k_decode"
+ENCODE_PROG_PATH = "build/nvjpeg2k_encode.exe"
+DECODE_PROG_PATH = "build/nvjpeg2k_decode.exe"
 
 SUBSAMPLINGS = ["444"]
 LOSSY_MODES = ["lossy", "lossy-ht"]
