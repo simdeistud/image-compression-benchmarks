@@ -118,25 +118,77 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    unsigned char *inbuf = NULL;
+    size_t inbuf_size = 0;
+    if (!strcmp(jpeg2k_input_path, "-"))
+    {
+        int err = load_img_from_stdin(&inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+    else
+    {
+        int err = load_img_from_path(jpeg2k_input_path, &inbuf, &inbuf_size);
+        if (err)
+        {
+            return err;
+        }
+    }
+
     if (benchmark)
     {
         /* === DECODER BENCHMARK === */
-       
+        cudaStream_t stream = 0;
+        nvjpeg2kHandle_t handle = NULL;
+        nvjpeg2kDecodeState_t decode_state = NULL;
+        nvjpeg2kStream_t jpeg2k_stream = NULL;
+        nvjpeg2kDecodeParams_t decode_params = NULL;
+
+        CHECK_NVJPEG2K(nvjpeg2kCreateSimple(&handle));
+        CHECK_NVJPEG2K(nvjpeg2kDecodeStateCreate(handle, &decode_state));
+        CHECK_NVJPEG2K(nvjpeg2kStreamCreate(&jpeg2k_stream));
+        CHECK_NVJPEG2K(nvjpeg2kDecodeParamsCreate(&decode_params));
+
+        unsigned char *jpeg2k_input = inbuf;
+        size_t jpeg2k_input_size = inbuf_size;
+
+        CHECK_NVJPEG2K(nvjpeg2kStreamParse(
+            handle, jpeg2k_input, jpeg2k_input_size, 0, 0, jpeg2k_stream));
+
+        nvjpeg2kImageInfo_t image_info;
+        CHECK_NVJPEG2K(nvjpeg2kStreamGetImageInfo(jpeg2k_stream, &image_info));
+
+        CHECK_NVJPEG2K(nvjpeg2kDecodeParamsSetRGBOutput(decode_params, 1));
+        CHECK_NVJPEG2K(nvjpeg2kDecodeParamsSetOutputFormat(
+            decode_params, NVJPEG2K_FORMAT_INTERLEAVED));    
+        
+        unsigned char* rgbi24_output_device = NULL;
+        size_t rgbi24_output_size = image_info.image_width * image_info.image_height * 3;
+        CHECK_CUDA(cudaMalloc((void**)&rgbi24_output_device, rgbi24_output_size));
+        unsigned char* rgbi24_output = malloc(rgbi24_output_size);
+        
+        unsigned char* out_ptrs[3] = { rgbi24_output_device, NULL, NULL };
+        size_t out_pitches[3]      = { image_info.image_width * 3, 0, 0 };
+
+        nvjpeg2kImage_t outimg = {0};
+        outimg.pixel_data      = (void**)out_ptrs;
+        outimg.pitch_in_bytes  = out_pitches;
+        outimg.pixel_type      = NVJPEG2K_UINT8;
+        outimg.num_components = 3;
         clock_t total_processing_time = 0;
         int width = 0, height = 0;
         for(int i = 0; i < iterations; ++i)
         {
             clock_t t0 = clock();
-            
+            nvjpeg2kDecodeImage(handle, decode_state, jpeg2k_stream, decode_params, &outimg, stream);
+            cudaMemcpy(rgbi24_output, rgbi24_output_device, rgbi24_output_size, cudaMemcpyDeviceToHost);
             clock_t t1 = clock();
             total_processing_time += t1 - t0;
         }
         
-        printf("Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
-        printf("Average processing time per iteration (milliseconds):%f\n", ((double)total_processing_time) / iterations / CLOCKS_PER_SEC * 1000);
-        printf("Average frames per second:%f\n", iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        printf("Average megapixels per second:%f\n", (width * height) / (double)1000000 * iterations / (((double)total_processing_time) / CLOCKS_PER_SEC));
-        //img_destroy(jpeg2k_input);
+        fprintf(stderr, "Total processing time (seconds):%f\n", ((double)total_processing_time) / CLOCKS_PER_SEC);
     }
 
     /* === DECODER SETUP === */
@@ -151,24 +203,8 @@ int main(int argc, char *argv[])
     CHECK_NVJPEG2K(nvjpeg2kStreamCreate(&jpeg2k_stream));
     CHECK_NVJPEG2K(nvjpeg2kDecodeParamsCreate(&decode_params));
 
-    unsigned char *jpeg2k_input = NULL;
-    size_t jpeg2k_input_size = 0;
-    if (!strcmp(jpeg2k_input_path, "-"))
-    {
-        int err = load_img_from_stdin(&jpeg2k_input, &jpeg2k_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
-    else
-    {
-        int err = load_img_from_path(jpeg2k_input_path, &jpeg2k_input, &jpeg2k_input_size);
-        if (err)
-        {
-            return err;
-        }
-    }
+    unsigned char *jpeg2k_input = inbuf;
+    size_t jpeg2k_input_size = inbuf_size;
 
     CHECK_NVJPEG2K(nvjpeg2kStreamParse(
         handle, jpeg2k_input, jpeg2k_input_size, 0, 0, jpeg2k_stream));
@@ -186,10 +222,13 @@ int main(int argc, char *argv[])
     unsigned char* rgbi24_output = malloc(rgbi24_output_size);
     
 
-    nvjpeg2kImage_t outimg;
-    outimg.pixel_data[0] = rgbi24_output_device;
-    outimg.pitch_in_bytes[0] = image_info.image_width * 3;
-    outimg.pixel_type = NVJPEG2K_UINT8;
+    unsigned char* out_ptrs[3] = { rgbi24_output_device, NULL, NULL };
+    size_t out_pitches[3]      = { image_info.image_width * 3, 0, 0 };
+
+    nvjpeg2kImage_t outimg = {0};
+    outimg.pixel_data      = (void**)out_ptrs;
+    outimg.pitch_in_bytes  = out_pitches;
+    outimg.pixel_type      = NVJPEG2K_UINT8;
     outimg.num_components = 3;
     
     /* === DECODER TEST === */
