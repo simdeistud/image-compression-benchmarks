@@ -11,8 +11,8 @@ ENCODE_PROG_PATH = "build/nvjpeg2k_encode.exe"
 DECODE_PROG_PATH = "build/nvjpeg2k_decode.exe"
 
 SUBSAMPLINGS = ["444"]
-LOSSY_MODES = ["lossy", "lossy-ht"]
-LOSSLESS_MODES = ["lossless", "lossless-ht"]
+LOSSY_MODES = ["lossy-ht"]
+LOSSLESS_MODES = ["lossless-ht"]
 QUALITIES = list(range(40, 101, 1))
 
 def run_cmd(cmd, stdin_bytes: bytes):
