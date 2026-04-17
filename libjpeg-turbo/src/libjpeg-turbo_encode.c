@@ -259,7 +259,8 @@ int main(int argc, char* argv[])
             cinfo.comp_info[0].h_samp_factor = subsampling_to_hsamp(subsampling);
             cinfo.arith_code = get_entropy(entropy_algorithm);
             cinfo.dct_method = get_dct(dct_algorithm);
-            cinfo.restart_interval = restart_interval;
+            cinfo.restart_interval = restart_interval;// units: MCUs
+            cinfo.restart_in_rows  = 0; // ensure not interpreted as MCU rows
             size_t jpeg_output_size = 0;
             JSAMPLE* jpeg_output = NULL;
             jpeg_mem_dest(&cinfo, &jpeg_output, &jpeg_output_size);
