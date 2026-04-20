@@ -74,6 +74,12 @@ def main():
 
     resolution = sys.argv[1]
     width, height = map(int, resolution.split("x"))
+    if width > 0:
+        RESTART_INTERVALS = [0, 8]
+    if width > 1280:
+        RESTART_INTERVALS = [0, 16]
+    if width > 1920:
+        RESTART_INTERVALS = [0, 64]
     image_folder = Path(sys.argv[2])
     results_folder = Path(sys.argv[3])
     iterations = int(sys.argv[4]) if len(sys.argv) > 4 else 100
