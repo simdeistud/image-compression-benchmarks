@@ -12,7 +12,7 @@ DECODE_PROG_PATH = "build/gpujpeg_decode.exe"
 
 SUBSAMPLINGS = ["420"]
 QUALITIES = range(40, 91, 1)
-FORMATS = ["interleaved"]
+FORMATS = ["planar"]
 RESTART_INTERVALS = [8]
 
 
