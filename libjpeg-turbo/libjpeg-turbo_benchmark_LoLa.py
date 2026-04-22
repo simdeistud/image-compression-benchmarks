@@ -10,11 +10,11 @@ from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 ENCODE_PROG_PATH = "build/libjpeg-turbo_encode"
 DECODE_PROG_PATH = "build/libjpeg-turbo_decode"
 
-SUBSAMPLINGS = ["444", "422", "420"]
-QUALITIES = range(0, 101, 10)
-DCT_ALGORITHMS = ["int", "fast", "float"]
+SUBSAMPLINGS = ["420"]
+QUALITIES = range(40, 91, 1)
+DCT_ALGORITHMS = ["int"]
 ENTROPY_ALGORITHMS = ["huffman"]
-RESTART_INTERVALS = [0, 8, 16, 32, 64]
+RESTART_INTERVALS = [0, 8]
 
 
 def run_cmd(cmd, stdin_bytes: bytes):
@@ -105,7 +105,7 @@ def main():
     current = 0
     print(f"Total combinations to test: {combinations}")
 
-    out_csv = results_folder / f"results_{resolution}.csv"
+    out_csv = results_folder / f"results_LoLa_{resolution}.csv"
     if not out_csv.exists() or out_csv.stat().st_size == 0:
         out_csv.write_text(
             "img_name,subsampling,quality,dct_algorithm,entropy_algorithm,restart_interval,"
