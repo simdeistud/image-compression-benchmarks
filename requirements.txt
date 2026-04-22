@@ -1,3 +1,5 @@
 pathlib
 numpy
 scikit-image
+pandas
+matplotlib
