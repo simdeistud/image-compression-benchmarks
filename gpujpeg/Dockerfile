@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /workspace/results /workspace/imageset /workspace/src
 WORKDIR /workspace
 RUN git clone https://github.com/CESNET/GPUJPEG.git gpujpeg
-RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=native -S gpujpeg -B gpujpeg/build; \
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=native -DUSE_NATIVE_CPU_ARCH=ON -S gpujpeg -B gpujpeg/build; \
     cmake --build gpujpeg/build --config Release --parallel; \
     cmake --install gpujpeg/build
 
